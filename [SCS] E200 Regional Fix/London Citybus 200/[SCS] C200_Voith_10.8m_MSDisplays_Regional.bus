@@ -1,0 +1,709 @@
+	Programmiersprache funktioniert wie folgt: Man kann reinschreiben, was man will, das Programm ignoriert
+	alles AUssER die Schlusselworter wie [mesh], wenn sie am Anfang der Zeile stehen! Die Schlusselworter mussen
+	ausserdem alleine in ihrer Zeile stehen, nur dann werden sie erkannt. Ist dem so, werden die entsprechenden folgenden Zeilen
+	ausgelesen, um die Parameter zu finden, d.h. diese mussen dann direkt im Anschluss und zeilenweise alleine folgen! Wurde
+	die Anzahl der Zeilen abgearbeitet, sucht das Programm wieder nach Schlusselwortern.
+
+	Im Allgemeinen spielt die Reihenfolge keine Rolle, ausser bei der Beschreibung von Arrays, wie den Gangen oder den Meshs.
+
+	Es folgt nun der SD200 von Rudiger H. aus B.:
+
+
+
+
+	[friendlyname] ist der Abschnitt, wo
+	{Hersteller} und
+	{Typ} genannt wird.
+	{Anstrich} ist der Name des Standardanstrichs (wenn der Texturtausch nicht aktiv ist)
+
+[friendlyname]
+London Citybus
+[SCS] C200 10.8m | Voith | MSDisplays | Regional
+Red
+
+
+[description]
+London Citybus 200 with DIWA 4-speed gearbox. Limited to 60 mph.
+
+Specification:
+Width:   2.44 m
+Length: 10.8 m
+Height:  2.86 m
+Engine: 6.7L 6 cylinder Turbodiesel
+	247 hp @ 2400 rpm
+        1020 Nm @ 1400 rpm
+Gearbox: DIWA 4-spd D824.3
+
+MSDisplays Mod By BDotG
+[end]
+
+
+
+
+
+
+
+	[number] aktiviert die Zuweisung von Nummern
+	{colorscheme specific numbers path}	Pfad zu den *.org-(Omsi-Registration)-Dateien, welche fur die Vergabe von Nummern zustandig sind.
+
+	Aufbau einer Nummernliste: in der ersten Zeile kommt der Name des Anstrichs (wie er auch im CTC angegeben wird), dann beliebig viele zulassige Nummern.
+	Steht in der ersten Zeile nichts, dann handelt es sich um die "Hauptliste", welche fur alle Anstriche gilt, fur welche keine Nummern spezifiziert werden.
+
+
+	[registration_automatic] aktiviert die Zuweisung der Kennzeichen im automatischen Modus
+	{regPrefix}				Prafix vor Nummer am Kennzeichen. Soll bspw. Nr 2000 das Kennzeichen "D-A 2000H" bekommen, ist der Prafix "D-A "
+	{regPostfix}				Postfix hinter Nummer am Kennzeichen. Im obigen Beispiel "H".
+
+	[registration_list] offnet die angegebene Datei, um die Kennzeichenzuweisung nach den Nummern vorzunehmen. Der Index lauft hierbei parallel zu jener *.org-Datei, welche die Hauptliste enthalt.
+	{filename}
+
+	[registration_free] aktiviert die freie Kennzeichenzuweisung. Im AI-Modus wird ein Kennzeichen der Map-Registrations-Datei verwendet, der User kann es fur sein Fahrzeug frei wahlen.
+
+
+
+
+[number]
+Nos_C200.org
+
+[registration_list]
+Regs_C200.org
+
+
+
+[kmcounter_init]
+2012
+60000
+
+
+[sound]
+sound\sound_Voith.cfg
+
+[sound_ai]
+sound\sound_Voith.cfg
+
+[model]
+model\model_C200 10.8_MSDisplays.cfg
+
+[paths]
+model\paths regional.cfg
+
+[passengercabin]
+model\passengercabin regional.cfg
+
+
+
+	////////////////////////////////////////////////////////
+		Scripts
+	////////////////////////////////////////////////////////
+[script]
+32
+script\C200_main_MSDisplays.osc
+script\C200_main_AI_MSDisplays.osc
+..\MAN_SD202\script\auspuff.osc
+..\MAN_SD202\script\wiper.osc
+..\MAN_SD202\script\klappern.osc
+..\MAN_SD202\script\forcefeedback.osc
+..\MAN_SD202\script\rain.osc
+..\MAN_SD202\script\dirt.osc
+script\collision.osc
+script\cockpit.osc
+script\Gearbox\DIWA.osc
+script\engine_E40D.osc
+script\elec.osc
+script\bremse.osc
+script\door_8.9m.osc
+script\C200_Sound_Volumes_Script.osc
+script\ticketprinter_l.osc
+script\lights.osc
+script\Dashscreen.osc
+script\Road-hog123\heating_script.osc
+script\Road-hog123\RH-Lib\#lib_script.osc
+script\Road-hog123\ICU400\signController_script.osc
+script\Road-hog123\Powerblind\powerblind_script.osc
+script\iBus\IBIS-2.osc
+script\Road-hog123\RIBAS\RIBAS_script.osc
+script\CCTV\CCTVBoard_Script.osc
+..\MS_Veiling\script\ExtDisplays\ExtDisplays.osc
+..\MS_Veiling\script\ExtDisplays\Hanover\Controllers\deric.osc
+..\MS_Veiling\script\ExtDisplays\Mobitec\Controllers\602.osc
+..\MS_Veiling\script\rhlib\rhlib_script.osc
+..\MS_Veiling\script\rhlib\rhlib_draw_script.osc
+..\MS_Veiling\script\rhlib\rhlib_draw_transmap_script.osc
+
+[varnamelist]
+33
+..\MAN_SD202\script\rain_varlist.txt
+..\MAN_SD202\script\dirt_varlist.txt
+..\MAN_SD202\script\wiper_varlist.txt
+..\MAN_SD202\script\auspuff_varlist.txt
+script\AI_varlist.txt
+script\collision_varlist.txt
+script\Gearbox\DIWA_varlist.txt
+script\engine_varlist.txt
+script\elec_varlist.txt
+script\bremse_varlist.txt
+script\door_varlist.txt
+script\cockpit_varlist.txt
+script\klappern_varlist.txt
+script\ticketprinter_varlist.txt
+script\visual_varlist_MSDisplays.txt
+script\sidepanel_varlist.txt
+script\lights_varlist.txt
+script\Dashscreen_varlist.txt
+script\Road-hog123\heating_varlist.txt
+script\Road-hog123\RH-Lib\#lib_varlist.txt
+script\Road-hog123\ICU400\signController_varlist.txt
+script\Road-hog123\Powerblind\powerblind_varlist.txt
+script\iBus\IBIS_varlist_l.txt
+script\Road-hog123\RIBAS\RIBAS_varlist.txt
+script\CCTV\CCTVBoard_varlist.txt
+..\MS_Veiling\script\ExtDisplays\shared_varlist.txt
+..\MS_Veiling\script\ExtDisplays\Hanover\hanover_varlist.txt
+..\MS_Veiling\script\ExtDisplays\Hanover\Controllers\deric_varlist.txt
+..\MS_Veiling\script\ExtDisplays\Mobitec\mobitec_varlist.txt
+..\MS_Veiling\script\ExtDisplays\Mobitec\Controllers\602_varlist.txt
+..\MS_Veiling\script\rhlib\rhlib_varlist.txt
+..\MS_Veiling\script\rhlib\rhlib_draw_varlist.txt
+..\MS_Veiling\script\rhlib\rhlib_draw_transmap_varlist.txt
+
+[stringvarnamelist]
+14
+script\ticketprinter_stringvarlist_l.txt
+script\cockpit_stringvarlist.txt
+script\Dashscreen_stringvarlist.txt
+script\Road-hog123\RH-Lib\#lib_stringvarlist.txt
+script\Road-hog123\ICU400\signController_stringvarlist.txt
+script\Road-hog123\Powerblind\powerblind_stringvarlist.txt
+script\iBus\IBIS_stringvarlist_l.txt
+script\iBus\ibus_fontfile_stringvarlist.txt
+script\CCTV\CCTVBoard_stringvarlist.txt
+..\MS_Veiling\script\ExtDisplays\shared_stringvarlist.txt
+..\MS_Veiling\script\ExtDisplays\Hanover\Controllers\deric_stringvarlist.txt
+..\MS_Veiling\script\ExtDisplays\Mobitec\Controllers\602_stringvarlist.txt
+..\MS_Veiling\script\rhlib\rhlib_register_stringvarlist.txt
+..\MS_Veiling\script\rhlib\rhlib_draw_stringvarlist.txt
+
+[constfile]
+26
+..\MAN_SD202\script\auspuff_constfile.txt
+..\MAN_SD202\script\wiper_constfile.txt
+..\MAN_SD202\script\dirt_constfile.txt
+script\AI_constfile.txt
+script\collision_constfile.txt
+script\Gearbox\DIWA_854.5_constfile.txt
+script\engine_constfile_ISB4-5_200HP_Euro5_London.txt
+script\elec_constfile.txt
+script\bremse_constfile.txt
+script\door_constfile.txt
+script\cockpit_constfile.txt
+script\klappern_constfile.txt
+script\forcefeedback_constfile.txt
+script\lights_constfile.txt
+script\Dashscreen_constfile_8.9m.txt
+script\Road-hog123\RH-Lib\#lib_constfile.txt
+script\Road-hog123\heating_constfile.txt
+script\Road-hog123\ICU400\signController_config.txt
+script\Road-hog123\Powerblind\powerblind_constfile.txt
+script\Road-hog123\Powerblind\powerblind_config.txt
+script\Road-hog123\RIBAS\RIBAS_constfile.txt
+script\CCTV\CCTVBoard_Constfile.txt
+..\MS_Veiling\script\ExtDisplays\Hanover\Controllers\deric_constfile.txt
+..\MS_Veiling\script\ExtDisplays\Hanover\hanover_constfile.txt
+..\MS_Veiling\script\ExtDisplays\Mobitec\Controllers\602_constfile.txt
+..\MS_Veiling\script\ExtDisplays\Mobitec\mobitec_constfile.txt
+
+################################################################################
+	Cameras
+################################################################################
+
+# Driver Cameras
+
+	0: Over-shoulder Left
+[add_camera_driver]
+0.37
+4.77
+1.9
+-0.06
+55
+-130
+-5
+
+	1: Front Door
+[add_camera_driver]
+0.7
+4.1
+1.9
+-0.06
+55
+-80
+-12
+
+	2: Left Wing Mirror
+[add_camera_driver]
+0.7
+4.1
+1.9
+-0.06
+55
+-45
+-5
+
+	3: Normal Driving
+[add_camera_driver]
+0.7
+4.0
+1.9
+-0.06
+55
+0
+-5
+
+	4: Right Wing Mirror
+[add_camera_driver]
+0.7
+4.1
+1.9
+-0.06
+55
+45
+0
+
+	5: Driver's Window
+[add_camera_driver]
+0.7
+4.2
+1.9
+-0.06
+55
+80
+-5
+
+	6: Over-shoulder Right
+[add_camera_driver]
+0.93
+4.4
+1.9
+-0.06
+55
+130
+-5
+
+	7: Right Panel
+[add_camera_driver]
+0.7
+4.04
+1.9
+-0.06
+55
+50
+-37
+
+	8: Instrument Cluster
+[add_camera_driver]
+0.7
+4.65
+2.25
+-0.06
+50
+0
+-70
+
+	9: Ticket Machine
+[add_camera_driver]
+0.7
+4.0
+1.9
+-0.06
+35
+-50
+-35
+
+[view_ticketselling]
+
+	10: Ibus and Mobitec
+[add_camera_driver]
+0.7
+4.0
+1.9
+-0.06
+35
+20
+42
+
+[view_schedule]
+
+	11: Passenger View Outside Cab
+[add_camera_driver]
+0.0
+4.4
+1.9
+-0.06
+55
+-160
+-10
+
+
+################
+Passagiersichten
+################
+
+	0: Front Left
+[add_camera_pax]
+-0.7
+2.8
+1.6
+-0.06
+45
+0
+-1
+
+	8: rear window
+[add_camera_pax]
+0
+-2.39884
+2.28169
+-0.06
+45
+180
+0
+
+	7: Rear
+[add_camera_pax]
+0
+-4.68777
+2.21894
+-0.06
+45
+0
+-5
+
+	6: Rear Left
+[add_camera_pax]
+-0.86612
+-4.36459
+2.25788
+-0.06
+45
+0
+-5
+
+
+	5: Rear Right
+[add_camera_pax]
+0.86612
+-4.36459
+2.25788
+-0.06
+45
+0
+-5
+
+
+	4: Rear Mid left
+[add_camera_pax]
+-0.72
+-0.64388
+1.68
+-0.06
+45
+0
+-3
+
+	3: Standing, rear exit
+[add_camera_pax]
+0.6
+-1.08327
+2.15
+-0.06
+66
+270
+-15
+
+	2: Mid Right
+[add_camera_pax]
+0.72
+-0.2
+1.96021
+-0.06
+45
+0
+-7
+
+	1: Mid
+[add_camera_pax]
+0
+1.09574
+1.96021
+-0.06
+45
+0
+-5
+
+
+    11: Oberdeck hinten Mitte
+[add_camera_pax]
+0
+0
+3.0
+40.0
+45
+0
+0
+
+    12: Oberdeck hinten Mitte
+[add_camera_pax]
+0
+0
+3.0
+75
+45
+0
+0
+
+
+    13: Oberdeck hinten Mitte
+[add_camera_pax]
+0
+0
+3.0
+100
+45
+0
+0
+
+    14: Oberdeck hinten Mitte
+[add_camera_pax]
+3.5
+10.26
+0.5
+0
+45
+135
+0
+
+    15: Oberdeck hinten Mitte
+[add_camera_pax]
+-3.5
+10.26
+0.5
+0
+45
+135
+0
+
+
+	Folgender Befehl setzt die Standardfahrerkamera:
+
+[set_camera_std]
+3
+
+	Folgender Befehl setzt den Zentrierpunkt der Aussenkamera:
+
+[set_camera_outside_center]
+0
+0
+1.75
+
+
+
+	////////////////////////////////////////////////////////
+		Reflexionskameras *NEU01*
+	////////////////////////////////////////////////////////
+
+	In dieser Sektion werden die Reflexionkameras gesetzt. Ist dieses Fahrzeug das eigene, wird aus einer jeden Kamera Perspektive
+	die Szene gerendert und dann entsprechend aufsteigend in die Texturen mit den Namen "reflexion0.bmp", "reflexion1.bmp" usw. gespeichert,
+	von wo aus dann auf die Textur zwecks eigentlichen Rendervorgang zuruckgegriffen werden kann.
+
+1: Right Mirror
+[add_camera_reflexion]
+1.28001
+4.78676
+2.17314
+0
+52
+15
+11
+0.5
+
+2: Left Mirror
+[add_camera_reflexion]
+-1.28001
+4.73038
+2.17314
+0
+52
+-21
+11
+0.5
+
+3: Interior Mirror
+[add_camera_reflexion]
+-0.00792
+5.0912
+2.13608
+0
+52
+-18
+2
+0.5
+
+4: Left Mirror (small)
+[add_camera_reflexion]
+-1.29707
+4.7245
+1.97373
+0
+60
+-21
+11
+0.5
+
+5: Right Mirror (small)
+[add_camera_reflexion]
+1.33317
+4.79937
+2.03443
+0
+60
+15
+11
+0.5
+
+6: CCTV Main
+[add_camera_reflexion]
+0
+3.60161
+2.75
+0.0
+70
+165
+-50
+2.5
+
+	////////////////////////////////////////////////////////
+		Physikalische und geometrische Grunddaten
+	////////////////////////////////////////////////////////
+
+
+	Masse in t:
+[mass]
+8.2
+
+	Tragheitsmomente um x, y und z-Achse, also Quer-, Langs- und Hochachse um den Schwerpunkt in dieser Reihenfolge in t*m^2:
+500
+200
+500
+
+[momentofintertia]
+300
+80
+300
+
+
+	Boundingbox des Busses *NEU01*
+
+[boundingbox]
+2.452
+10.070
+4.071
+0.000
+0.687
+2.386
+
+
+	Hohe d. Schwerpunktes uberm Boden:
+
+[schwerpunkt]
+1.6
+
+
+
+	Rollwiderstand (konstant, wird demnachst eventuell geandert) als Kraft in N
+[rollwiderstand]
+1000
+
+	Langskoordinate des Drehpunktes, wenn der Bus eine Kurve beschreibt:
+[rot_pnt_long]
+-2.577
+
+	Kehrwert des minimalen Lenkradiuses: (Berechenbar uber die Formel: inv_turnradius = tan(alpha)/s,
+	wobei alpha der maximale Winkel bspw. der Vorderachse und s deren Abstand zum Drehpunkt in Langsrichtung ist:
+
+[inv_min_turnradius]
+0.16899
+
+
+
+
+[ai_deltaheight]
+-0.12
+
+
+
+	Folgende Sektion erzeugt nacheinander die Busachsen mit ihren Parametern. ACHTUNG: bei einem Fahrzeug mit
+	unterschiedlich grossen Radern sollte zunachst die angetriebene Achse eingegeben werden, da die zuerst ein-
+	gegebene Achse den Antriebsraddurchmesser vorgibt, d.h. das Getriebeubersetzungsverhaltnis zur Ge-
+	schwindigkeit ist in Bezug auf die 0. Achse gemessen.
+
+	Vorderachse:
+
+
+[newachse]
+
+	Koordinate:
+
+achse_long
+2.943
+
+	Breite der Auflageflache beider Reifen, also ungefahr die Busbreite
+
+achse_maxwidth
+2.4
+
+achse_minwidth
+1.76
+
+	Raddurchmesser der Rader dieser Achse
+
+achse_raddurchmesser
+0.94
+
+	Federkonstante der Federung PRO SEITE in kN/m
+
+achse_feder
+240
+
+	Hochstbelastung in kN
+
+achse_maxforce
+90
+
+	Dampferkonstante in kNs/m
+
+achse_daempfer
+20
+	Ist diese Achse angetrieben?
+
+achse_antrieb
+0
+
+
+	Hinterachse:
+
+[newachse]
+achse_long
+-2.577
+achse_maxwidth
+2.4
+achse_minwidth
+1.4
+achse_raddurchmesser
+0.94
+achse_feder
+280
+achse_maxforce
+116
+achse_daempfer
+20
+achse_antrieb
+1
