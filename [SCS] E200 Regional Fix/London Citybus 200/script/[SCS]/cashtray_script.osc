@@ -1,0 +1,69 @@
+'#####################################
+'           Cashtray Script
+'#####################################
+
+{trigger:cashtray_1p}
+	0 (M.V.GiveChangeCoin)
+	(T.L.ev_ticketsale_givechange)
+	(T.L.ev_ticketsale_givechange_1p)
+{end}
+
+{trigger:cashtray_2p}
+	1 (M.V.GiveChangeCoin)
+	(T.L.ev_ticketsale_givechange)
+	(T.L.ev_ticketsale_givechange_2p)
+{end}
+
+{trigger:cashtray_5p}
+	2 (M.V.GiveChangeCoin)
+	(T.L.ev_ticketsale_givechange)
+	(T.L.ev_ticketsale_givechange_5p)
+{end}
+
+{trigger:cashtray_10p}
+	3 (M.V.GiveChangeCoin)
+	(T.L.ev_ticketsale_givechange)
+	(T.L.ev_ticketsale_givechange_10p)
+{end}
+
+{trigger:cashtray_20p}
+	4 (M.V.GiveChangeCoin)
+	(T.L.ev_ticketsale_givechange)
+	(T.L.ev_ticketsale_givechange_20p)
+{end}
+
+{trigger:cashtray_50p}
+	5 (M.V.GiveChangeCoin)
+	(T.L.ev_ticketsale_givechange)
+	(T.L.ev_ticketsale_givechange_50p)
+{end}
+
+{trigger:cashtray_100p}
+	6 (M.V.GiveChangeCoin)
+	(T.L.ev_ticketsale_givechange)
+	(T.L.ev_ticketsale_givechange_100p)
+{end}
+
+{trigger:cashtray_200p}
+	7 (M.V.GiveChangeCoin)
+	(T.L.ev_ticketsale_givechange)
+	(T.L.ev_ticketsale_givechange_200p)
+{end}
+
+{trigger:cashtray_500p}
+	8 (M.V.GiveChangeCoin)
+	(T.L.ev_ticketsale_givechange)
+	(T.L.ev_ticketsale_givechange_200p)
+{end}
+
+{trigger:cashtray_1000p}
+	9 (M.V.GiveChangeCoin)
+	(T.L.ev_ticketsale_givechange)
+	(T.L.ev_ticketsale_givechange_200p)
+{end}
+
+{trigger:cashtray_2000p}
+	10 (M.V.GiveChangeCoin)
+	(T.L.ev_ticketsale_givechange)
+	(T.L.ev_ticketsale_givechange_200p)
+{end}

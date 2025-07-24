@@ -1,0 +1,162 @@
+'########################################
+'#                                      #
+'#              aux SCRIPT             #
+'#                                      #
+'#    MAN Standarddoppeldecker SD200    #
+'#                                      #
+'#             Bauart SD80              #
+'#                                      #
+'########################################
+
+'(c) 01.11.2012 Marcel Kuhnt, Rudiger Hulsmann
+
+'Script Version: 1.0
+'Omsi release: 1.0
+
+
+'Revision History:
+'- Marcel Kuhnt		10.08.2009	Added Revision History
+'- Rudiger Hulsmann	18.09.2010	Microphone stored in cockpit script
+'- Marcel Kuhnt		30.11.2010	Bugfix: press [D] in AI mode if motor running but neutral
+'- Marcel Kuhnt		04.07.2011	Added light repair
+'- Marcel Kuhnt		11.12.2012	Added elec repair
+'- Marcel Kuhnt		05.08.2013	Added door repair
+
+'------------------------------------------------------------------------------------------
+
+
+'######################
+'	Hauptteil
+'######################
+
+{init}
+	(M.L.RHLib_init)
+	(M.L.engine_Init)
+	(M.L.Antrieb_Init)
+	(M.L.Elec_Init)
+	(M.L.Door_Init)
+	(M.L.wiper_init)
+	(M.L.lights_init)
+	(M.L.bremse_init)
+	(M.L.cockpit_init)
+	(M.L.heating_init)
+	(M.L.Collision_Init)
+	(M.L.ticketprinter_init)
+	(M.L.dashscreen_init)
+	(M.L.ExtDisplays_init)
+	(M.L.IBIS_init)
+	(M.L.CCTVBoard_init)
+	(M.L.deric_init)
+	(M.L.602_init)
+
+	1 (S.L.YellowMirrors)
+{end}
+
+{frame}
+	(M.L.RHLib_frame)
+	(M.L.RHLib_frame_user)
+	(M.L.Engine_Frame)
+	(M.L.Antrieb_Frame)
+	(M.L.Elec_Frame)
+	(M.L.Door_frame)
+	(M.L.cockpit_frame)
+	(M.L.lights_frame)
+	(M.L.wiper_frame)
+	(M.L.Auspuff_Frame)
+	(M.L.bremse_frame)
+	(M.L.klappern_frame)
+	(M.L.FF_frame)
+	(M.L.rain_frame)
+	(M.L.dirt_frame)
+	(M.L.sound_volume_frame)
+	(M.L.heating_frame)
+	(M.L.ticketprinter_frame)
+	(M.L.dashscreen_frame)
+	(M.L.IBIS_frame)
+	(L.L.elec_busbar_main) 28 * (S.L.CCTVBoard_power)
+	(M.L.CCTVBoard_frame)
+
+	(L.L.vis_desttype) 0 =
+	{if}
+		1 (S.L.deric_enabled)
+		(M.L.deric_frame)
+	{else}
+		(M.L.602_frame)
+		0 (S.L.deric_enabled)
+	{endif}
+
+	(M.L.ExtDisplays_frame)
+		(L.L.elec_busbar_main) (S.L.ExtDisplays_ElectricsVariable)
+	
+	(L.L.AI_Engine) 0.5 >
+	(L.L.engine_on) 0.5 <
+	(L.L.antrieb_getr_gangvorwahl) 4 = ! || &&
+	{if}
+		0 (S.L.bremse_feststell_sw) (S.L.bremse_feststell)
+		1 (S.L.engine_injection_on)
+		750 (S.L.engine_n)
+		4 (S.L.antrieb_getr_gangvorwahl)
+		1 (S.L.engine_on)
+		(T.L.ev_enginestart)
+	{endif}
+
+	(L.L.AI_Engine) -0.5 <
+	(L.L.engine_on) 0.5 >
+	&&
+	{if}
+		0 (S.L.engine_on)
+		(T.L.ev_engineshutdown)
+		0 (S.L.engine_injection_on)
+		1 (S.L.bremse_feststell_sw) (S.L.bremse_feststell)
+	{endif}
+
+	1 (S.L.Refresh_Strings)
+{end}
+
+
+'[Num /]:	First Door Button
+{trigger:bus_doorfront0}
+	(M.L.cp_btn_doors_openFront_pressed)
+{end}
+
+{trigger:bus_doorfront0_off}
+	(M.L.cp_btn_doors_openFront_released)
+{end}
+
+'[Num *]:	Second Door Button
+{trigger:bus_doorfront1}
+	(M.L.cp_btn_doors_closeFront_pressed)
+{end}
+
+{trigger:bus_doorfront1_off}
+	(M.L.cp_btn_doors_closeFront_released)
+{end}
+
+'----------------------------------
+'Crash:
+
+{trigger:collision}
+	(M.L.Collision_Trigger)
+{end}
+
+
+'----------------------------------
+'malfunction reset:
+
+{trigger:malfunction_reset}
+	0 s0
+	(M.L.Collision_Malfunction_Reset)
+	(M.L.Elec_Malfunction_Reset)
+	
+	l0
+{end}
+
+
+'----------------------------------
+'malfunction time calc:
+
+{trigger:malfunction_gettime}
+	
+	(M.L.Elec_Malfunction_TimeCalc)
+{end}
+	
