@@ -1,0 +1,1507 @@
+'##############
+'Cockpit-Script
+'##############
+
+'Simuliert alle unmittelbar mit dem Armaturenbrett zusammenhngenden Funktionen
+
+'(c) 23.10.2009 Rudiger Hulsmann
+'(c) 01.11.2012 Marcel Kuhnt
+'(c) 27.02.2011 Markus Rabe
+
+'Script Version: 1.0
+'Omsi release: 1.0
+
+'Needs:
+'- antrieb
+'- engine
+'- bremse
+'- lights
+'- wiper?
+'- doors
+
+
+'Revision History:
+'- Rudiger Hulsmann	09.06.2009	Last Change
+'- Marcel Kuhnt		13.06.2009	Added Gearbox switches			
+'- Marcel Kuhnt		13.06.2009	Moved some switchvars to other scripts	
+'- Rudiger Hulsmann	19.06.2009	Added Openable Window Triggers
+'- Rudiger Hulsmann	23.10.2009	Added Battery and kinderwagen light
+'- Marcel Kuhnt		26.10.2009	Radio switchable with Motorkhlung (replaced with cassette player)
+'- Rudiger Hulsmann	28.10.2009	Added driver door
+'- Rudiger Hulsmann	16.12.2009	Added driver curtain
+'- Rudiger Hulsmann	18.12.2009	Bugfix driver curtain
+'- Marcel Kuhnt		15.04.2010	Traegheit debugged
+'- Rudiger Hulsmann	13.05.2010	Engine temperature
+'- Rudiger Hulsmann	03.06.2010	Automatic battery switch on key insertion (For standard-II-buses)
+'- Rudiger Hulsmann	08.06.2010	Automatic battery switch made optional, Auxiliary heating switchable by button or switch
+'- Rudiger Hulsmann	23.06.2010	Added mouse-clickable wiper lever on wheel console
+'- Rudiger Hulsmann	08.07.2010	Wiper lever: Improved usability
+'- Rudiger Hulsmann	18.07.2010	Wiper lever: soundfix for keyboard operation and new ignition key algorithm
+'- Rudiger Hulsmann	16.09.2010	Auxheat Switch Bugfix
+'- Rudiger Hulsmann	18.09.2010	Imported microphone switch
+'- Rudiger Hulsmann	17.10.2010	Added pressure warning needle
+'- Rudiger Hulsmann	23.10.2010	Added old-style gear button functionality
+'- Rudiger Hulsmann	06.11.2010	Gear-button "1" functionality removed for old-style gear buttons
+'- Rudiger Hulsmann	16.11.2010	Heating sliders
+'- Rudiger Hulsmann	23.11.2010	Central lubrication, cabin heater sound
+'- Rudiger Hulsmann	23.12.2010	Included 10 "multi-purpose" dummy switches
+'- Rudiger Hulsmann	29.12.2010	ASR switch
+'- Rudiger Hulsmann	04.01.2011	"D-only" gear selector function
+'- Rudiger Hulsmann	05.01.2011	fog lamp switch, high beam lever animation, clock debugged
+'- Rudiger Hulsmann	07.01.2011	Wiper lever sound and function debugges, availybility of several cockpit functions depending on bus type (via constfile)
+'- Rudiger Hulsmann	16.01.2011	Support for wiper turn-switch
+'- Rudiger Hulsmann	18.01.2011	Old-style gear button sounds
+'- Rudiger Hulsmann	26.01.2011	Invertable driver door
+'- Rudiger Hulsmann	26.01.2011	Thermometer
+'- Markus Rabe		27.02.2011	Heizlfter und Wagenheizung Motorabhngig, Leuchtmelder Hintertr an 80er D Wagen angepasst
+'- Marcel Kuhnt		25.06.2011	Nebelscheinwerfer-Schalter (cp_licht_nebelschw_sw)
+'- Marcel Kuhnt		29.06.2011	Trkontrolle fr D92 und D86 integriert
+'- Marcel Kuhnt		22.06.2012	Uhr luft nur, wenn Strom vorhanden
+'- Marcel Kuhnt		09.07.2012	Busbar wird als Faktor/Spannung interpretiert
+'- Marcel Kuhnt		25.07.2012	Stromverbrauch, Generierung von Leitwert
+'- Marcel Kuhnt		01.11.2012	Trentriegelungs-Leuchtmelder
+
+'------------------------------------------------------------------------------------------
+
+
+'----------------------
+'	Trigger
+'----------------------
+
+{trigger:cp_Flap_0}
+	(L.L.cp_Int_Flap_0) ! (S.L.cp_Int_Flap_0)
+{end}
+
+{trigger:cp_Flap_1}
+	(L.L.cp_Int_Flap_1) ! (S.L.cp_Int_Flap_1)
+{end}
+
+{trigger:cp_btn_doors_openFront_em}
+	(M.L.cp_btn_doors_openFront_pressed)
+	1 (S.L.emergency_door0_open)
+{end}
+
+{trigger:cp_btn_doors_openFront_em_off}
+	(M.L.cp_btn_doors_openFront_released)
+	0 (S.L.emergency_door0_open)
+{end}
+
+{trigger:cp_btn_doors_closeFront_em}
+	(M.L.cp_btn_doors_closeFront_pressed)
+	1 (S.L.emergency_door0_close)
+{end}
+
+{trigger:cp_btn_doors_closeFront_em_off}
+	(M.L.cp_btn_doors_closeFront_released)
+	0 (S.L.emergency_door0_close)
+{end}
+
+{trigger:cp_btn_doors_openrear_em}
+	(M.L.cp_btn_doors_openrear_em_pressed)
+	1 (S.L.emergency_door1_open)
+{end}
+
+{trigger:cp_btn_doors_openrear_em_off}
+	(M.L.cp_btn_doors_openrear_em_released)
+	0 (S.L.emergency_door1_open)
+{end}
+
+{trigger:cp_btn_doors_closerear_em}
+	(M.L.cp_btn_doors_closerear_em_pressed)
+	1 (S.L.emergency_door1_close)
+{end}
+
+{trigger:cp_btn_doors_closerear_em_off}
+	(M.L.cp_btn_doors_closeFront_released)
+	0 (S.L.emergency_door1_close)
+{end}
+
+{trigger:cp_btn_doors_openFront}
+	(M.L.cp_btn_doors_openFront_pressed)
+{end}
+
+{trigger:cp_btn_doors_openFront_off}
+	(M.L.cp_btn_doors_openFront_released)
+{end}
+
+{trigger:cp_btn_doors_closeFront}
+	(M.L.cp_btn_doors_closeFront_pressed)
+{end}
+
+{trigger:cp_btn_doors_closeFront_off}
+	(M.L.cp_btn_doors_closeFront_released)
+{end}
+
+{trigger:cp_btn_doors_front}
+	(M.L.cp_btn_doors_front_pressed)
+{end}
+
+{trigger:cp_btn_doors_front_off}
+	(M.L.cp_btn_doors_front_released)
+{end}
+
+{trigger:cp_btn_doors_rear}
+	(M.L.cp_btn_doors_rear_pressed)
+{end}
+
+{trigger:cp_btn_doors_rear_off}
+	(M.L.cp_btn_doors_rear_released)
+{end}
+
+' [W]
+{trigger:kw_wipermode_up}
+'	Increase wiper mode
+
+	(L.L.cockpit_indicatorStalk_Wiper_rot) s0 1 + 3 min (S.L.cockpit_indicatorStalk_Wiper_rot)
+
+	(M.L.cp_updateWiperMode)
+{end}
+
+' [Shift]+[W]
+{trigger:cp_wischer_intervall_toggle}
+'	Decrease wiper mode
+
+	(L.L.cockpit_indicatorStalk_Wiper_rot) s0 1 - 0 max (S.L.cockpit_indicatorStalk_Wiper_rot)
+
+	(M.L.cp_updateWiperMode)
+{end}
+
+' [Ctrl]+[W]
+{trigger:cp_wischer_wascher_button}
+	1 (S.L.wiper_wascher_sw)
+	-1 (S.L.cockpit_indicatorStalk_Vertical_rot)
+{end}
+
+' [Ctrl]+[W] released
+{trigger:cp_wischer_wascher_button_off}
+	0 (S.L.wiper_wascher_sw) (S.L.cockpit_indicatorStalk_Vertical_rot)
+{end}
+
+{trigger:cp_wischer_drag}
+'	Change wiper position
+	(L.S.mouse_y) 50 / (L.L.cockpit_indicatorStalk_Wiper_rot) s0 + 0 max 3 min (S.L.cockpit_indicatorStalk_Wiper_rot)
+
+	(M.L.cp_updateWiperMode)
+{end}
+
+{trigger:cp_wischer_off}
+	(L.L.cockpit_indicatorStalk_Wiper_mode) (S.L.cockpit_indicatorStalk_Wiper_rot)
+{end}
+
+{trigger:cp_heating_temp_up}
+	(T.L.ev_cockpitButton)
+	(L.L.Screen_booted)
+	{if}
+		(M.L.dashscreen_heatingButtonPushed)
+		(M.L.heating_temp_up)
+	{endif}
+{end}
+
+{trigger:cp_heating_temp_up_off}
+	(T.L.ev_cockpitButton_off)
+{end}
+
+{trigger:cp_heating_temp_dn}
+	(T.L.ev_cockpitButton)
+	(L.L.Screen_booted)
+	{if}
+		(M.L.dashscreen_heatingButtonPushed)
+		(M.L.heating_temp_dn)
+	{endif}
+{end}
+
+{trigger:cp_heating_temp_dn_off}
+	(T.L.ev_cockpitButton_off)
+{end}
+
+{trigger:cp_heating_fan_up}
+	(T.L.ev_cockpitButton)
+	(L.L.Screen_booted)
+	{if}
+		(M.L.dashscreen_heatingButtonPushed)
+		(M.L.heating_fan_up)
+	{endif}
+{end}
+
+{trigger:cp_heating_fan_up_off}
+	(T.L.ev_cockpitButton_off)
+{end}
+
+{trigger:cp_heating_fan_dn}
+	(T.L.ev_cockpitButton)
+	(L.L.Screen_booted)
+	{if}
+		(M.L.dashscreen_heatingButtonPushed)
+		(M.L.heating_fan_dn)
+	{endif}
+{end}
+
+{trigger:cp_heating_fan_dn_off}
+	(T.L.ev_cockpitButton_off)
+{end}
+
+{trigger:cp_cashBoxLid}
+	(L.L.cp_cashBoxLid_pos) ! (S.L.cp_cashBoxLid_pos)
+	{if}
+		(T.L.ev_cashBoxLid_opn)
+	{else}
+		(T.L.ev_cashBoxLid_cls)
+	{endif}
+{end}
+
+{trigger:cp_reverseWarning_toggle}
+	(T.L.ev_cockpitButton)
+	(L.L.elec_busbar_main)
+	{if}
+		(L.L.cockpit_reverseWarningOff) ! (S.L.cockpit_reverseWarningOff)
+	{endif}
+{end}
+
+{trigger:cp_reverseWarning_toggle_off}
+	(T.L.ev_cockpitButton_off)
+{end}
+
+{trigger:cp_kneelDn}
+	(T.L.ev_cockpitButton)
+	(L.L.elec_busbar_main)
+	{if}
+		1 (S.L.cockpit_kneelDn)
+		(L.L.bremse_feststell) (L.L.Velocity) abs 3 < &&
+		{if}
+			2 (S.L.busKneeling)
+		{endif}
+	{endif}
+{end}
+
+{trigger:cp_kneelDn_off}
+	(T.L.ev_cockpitButton_off)
+	(L.L.busKneeling) 2 =
+	{if}
+		1 (S.L.busKneeling)
+	{endif}
+	0 (S.L.cockpit_kneelDn)
+{end}
+
+
+{trigger:cp_kneelUp}
+	(T.L.ev_cockpitButton)
+	(L.L.elec_busbar_main)
+	{if}
+		0 (S.L.busKneeling)
+		1 (S.L.cockpit_kneelUp)
+	{endif}
+{end}
+
+{trigger:cp_kneelUp_off}
+	(T.L.ev_cockpitButton_off)
+	0 (S.L.cockpit_kneelUp)
+{end}
+
+{trigger:cp_ramp}
+	(T.L.ev_cockpitButton)
+	(L.L.elec_busbar_main)
+	{if}
+		(L.L.ramp_target) ! (S.L.ramp_target)
+		1 (S.L.cp_ramp_sw)
+	{endif}
+{end}
+
+{trigger:cp_ramp_off}
+	(T.L.ev_cockpitButton_off)
+	0 (S.L.cp_ramp_sw)
+{end}
+
+{trigger:cp_seat_toggle}
+	(L.L.seat_vibration) 0 =
+	{if}
+		1 (S.L.seat_vibration)
+	{else}
+		0 (S.L.seat_vibration)
+	{endif}
+{end}
+
+{trigger:automatic_D}
+	(T.L.ev_gearSelect_DR)
+	
+	(L.L.cockpit_gangR)
+	{if}
+		0.5 (S.L.cockpit_gangD)
+	{else}
+		1 (S.L.cockpit_gangD)
+		
+		(L.L.Velocity) (C.L.antrieb_maxSelectionSpeed) -1 * >
+		(L.L.engine_n) (C.L.antrieb_maxSelectionRPM) < &&
+		(L.L.Throttle) 0.05 < &&
+		(L.L.bremse_feststell_sw) (C.L.antrieb_selectionWithoutHandbrake) || &&
+		(L.L.Brake) 0.95 > (C.L.antrieb_selectionWithoutFootbrake) || &&
+		{if}
+			4 (S.L.antrieb_getr_gangvorwahl)
+		{endif}
+	{endif}
+{end}
+
+{trigger:automatic_D_off}
+	(L.L.cockpit_gangD) 1 =
+	{if}
+		0.7 (S.L.cockpit_gangD)
+	{else}
+		0 (S.L.cockpit_gangD)
+	{endif}
+{end}
+
+
+{trigger:automatic_N}
+	1 (S.L.cockpit_gangN) (S.L.antrieb_getr_gangvorwahl)
+	
+	(L.L.cockpit_gangD) (L.L.cockpit_gangR) ||
+	{if}
+		(T.L.ev_gearSelect_N)
+	{else}
+		(T.L.ev_gearSelect_DR)
+	{endif}
+	
+	0 (S.L.cockpit_gangR) (S.L.cockpit_gangD)
+{end}
+
+{trigger:automatic_N_off}
+	0 (S.L.cockpit_gangN)
+{end}
+
+
+{trigger:automatic_R}
+	(T.L.ev_gearSelect_DR)
+	
+	(L.L.cockpit_gangD)
+	{if}
+		0.5 (S.L.cockpit_gangR)
+	{else}
+		1 (S.L.cockpit_gangR)
+		
+		(L.L.Velocity) (C.L.antrieb_maxSelectionSpeed) <
+		(L.L.engine_n) (C.L.antrieb_maxSelectionRPM) < &&
+		(L.L.Throttle) 0.05 < &&
+		(L.L.bremse_feststell_sw) (C.L.antrieb_selectionWithoutHandbrake) || &&
+		(L.L.Brake) 0.95 > (C.L.antrieb_selectionWithoutFootbrake) || &&
+		{if}
+			0 (S.L.antrieb_getr_gangvorwahl)
+		{endif}
+	{endif}
+{end}
+
+{trigger:automatic_R_off}
+	(L.L.cockpit_gangR) 1 =
+	{if}
+		0.7 (S.L.cockpit_gangR)
+	{else}
+		0 (S.L.cockpit_gangR)
+	{endif}
+{end}
+
+{trigger:automatic_R_interlock}
+
+{end}
+
+{trigger:horn}
+	(L.L.cockpit_hupe) ! (L.L.elec_busbar_main) (C.L.elec_busbar_minV) > &&
+	{if}
+		(T.L.horn_on)
+	{endif}
+	1 (S.L.cockpit_hupe)
+{end}
+
+{trigger:horn_off}	
+	(L.L.cockpit_hupe) (L.L.elec_busbar_main) (C.L.elec_busbar_minV) > &&
+	{if}
+		(T.L.horn_off)
+	{endif}
+	0 (S.L.cockpit_hupe)	
+{end}
+
+{trigger:cp_righttable_sw_toggle}
+	(L.L.cp_righttable_sw) ! (S.L.cp_righttable_sw)
+{end}
+
+{trigger:cp_fahrerlicht_toggle}
+	(T.L.ev_cockpitButton)
+	(L.L.cp_fahrerlicht_sw) ! (S.L.cp_fahrerlicht_sw)
+{end}
+
+{trigger:cp_fahrerlicht_toggle_off}
+	(T.L.ev_cockpitButton_off)
+{end}
+
+{trigger:cp_licht_oberdeck_toggle}
+	(T.L.ev_cockpitButton)
+	(L.L.cp_licht_oberdeck_sw) ! (S.L.cp_licht_oberdeck_sw)
+{end}
+
+{trigger:cp_licht_oberdeck_toggle_off}
+	(T.L.ev_cockpitButton_off)
+{end}
+
+{trigger:cp_licht_unterdeck_toggle}
+	(T.L.ev_cockpitButton)
+	(L.L.cp_licht_unterdeck_sw) ! (S.L.cp_licht_unterdeck_sw)
+{end}
+
+{trigger:cp_licht_unterdeck_toggle_off}
+	(T.L.ev_cockpitButton_off)
+{end}
+
+{trigger:cp_rollo_drag}
+	(L.S.mouse_y) 200 / (L.L.cp_rollo_pos) + (S.L.cp_rollo_pos) s0
+	l0 0 <
+	{if}
+		0 (S.L.cp_rollo_pos)
+	{endif}
+	l0 1 >
+	{if}
+		1 (S.L.cp_rollo_pos)
+	{endif}
+{end}
+
+{trigger:cp_fahrerfenster_opn_drag}
+	(L.L.cp_fahrerfenster_pos) (S.L.cp_fahrerfenster_lastpos)
+
+	(L.S.mouse_x) 500 / (L.L.cp_fahrerfenster_pos) + (S.L.cp_fahrerfenster_pos) s0
+	l0 0 <
+	{if}
+		0 (S.L.cp_fahrerfenster_pos)
+		(L.L.cp_fahrerfenster_endanschlag) !
+		{if}
+			(T.L.ev_fahrerfenster_cls)
+		{endif}
+		1 (S.L.cp_fahrerfenster_endanschlag)
+		
+	{endif}
+	l0 1 >
+	{if}
+		1 (S.L.cp_fahrerfenster_pos)
+		(L.L.cp_fahrerfenster_endanschlag) !
+		{if}
+			(T.L.ev_fahrerfenster_opn)
+		{endif}
+		1 (S.L.cp_fahrerfenster_endanschlag)
+	{endif}
+
+	(L.L.cp_fahrerfenster_pos) s0 0 > l0 1 < &&
+	{if}
+		0 (S.L.cp_fahrerfenster_endanschlag)
+	{endif}
+
+
+	(L.L.cp_fahrerfenster_pos) (L.L.cp_fahrerfenster_lastpos) - abs (L.S.Timegap) / (S.L.cp_fahrerfenster_speed)
+
+	(L.L.cp_fahrerfenster_pos) (L.L.cp_fahrerfenster2_pos) + 1 >
+	{if}
+		1 (L.L.cp_fahrerfenster_pos) - (S.L.cp_fahrerfenster2_pos)
+	{endif}
+{end}
+
+{trigger:cp_fahrerfenster_opn_off}
+	0 (S.L.cp_fahrerfenster_speed)
+{end}
+
+{trigger:cp_fahrerfenster2_opn_drag}
+	(L.L.cp_fahrerfenster2_pos) (S.L.cp_fahrerfenster2_lastpos)
+
+	(L.S.mouse_x) -500 / (L.L.cp_fahrerfenster2_pos) + (S.L.cp_fahrerfenster2_pos) s0
+	l0 0 <
+	{if}
+		0 (S.L.cp_fahrerfenster2_pos)
+		(L.L.cp_fahrerfenster2_endanschlag) !
+		{if}
+			(T.L.ev_fahrerfenster_cls)
+		{endif}
+		1 (S.L.cp_fahrerfenster2_endanschlag)
+		
+	{endif}
+	l0 1 >
+	{if}
+		1 (S.L.cp_fahrerfenster2_pos)
+		(L.L.cp_fahrerfenster2_endanschlag) !
+		{if}
+			(T.L.ev_fahrerfenster_opn)
+		{endif}
+		1 (S.L.cp_fahrerfenster2_endanschlag)
+	{endif}
+
+	(L.L.cp_fahrerfenster2_pos) s0 0 > l0 1 < &&
+	{if}
+		0 (S.L.cp_fahrerfenster2_endanschlag)
+	{endif}
+
+
+	(L.L.cp_fahrerfenster2_pos) (L.L.cp_fahrerfenster2_lastpos) - abs (L.S.Timegap) / (S.L.cp_fahrerfenster_speed)
+
+	(L.L.cp_fahrerfenster_pos) (L.L.cp_fahrerfenster2_pos) + 1 >
+	{if}
+		1 (L.L.cp_fahrerfenster2_pos) - (S.L.cp_fahrerfenster_pos)
+	{endif}
+{end}
+
+{trigger:cp_fahrerfenster2_opn_off}
+	0 (S.L.cp_fahrerfenster2_speed)
+{end}
+
+{trigger:cp_lenkrad_toggle}
+	(L.L.cp_lenkrad_visible) ! (S.L.cp_lenkrad_visible)
+{end}
+
+{trigger:cp_win_ll1}
+	0 s7 (M.L.window_changeState)
+{end}
+
+{trigger:cp_win_ll2}
+	1 s7 (M.L.window_changeState)
+{end}
+
+{trigger:cp_win_lt1}
+	2 s7 (M.L.window_changeState)
+{end}
+
+{trigger:cp_win_lt2}
+	3 s7 (M.L.window_changeState)
+{end}
+
+{trigger:cp_win_lt3}
+	4 s7 (M.L.window_changeState)
+{end}
+
+{trigger:cp_win_lt4}
+	5 s7 (M.L.window_changeState)
+{end}
+
+{trigger:cp_win_lt5}
+	6 s7 (M.L.window_changeState)
+{end}
+
+{trigger:cp_win_rl1}
+	7 s7 (M.L.window_changeState)
+{end}
+
+{trigger:cp_win_rl2}
+	8 s7 (M.L.window_changeState)
+{end}
+
+{trigger:cp_win_rt1}
+	9 s7 (M.L.window_changeState)
+{end}
+
+{trigger:cp_win_rt2}
+	10 s7 (M.L.window_changeState)
+{end}
+
+{trigger:cp_win_rt3}
+	11 s7 (M.L.window_changeState)
+{end}
+
+{trigger:cp_cabdoorhandle}
+	(L.L.cp_cabdoorhandle_pos) ! (S.L.cp_cabdoorhandle_pos)
+	(T.L.ev_fahrertuer_auf)
+{end}
+
+{trigger:cp_righttable_drag}
+	(L.L.cp_righttable_sw)
+	{if}
+		(L.L.cp_righttable_pos) (S.L.cp_righttable_lastpos)
+
+		(L.S.mouse_y) 500 / (L.L.cp_righttable_pos) + (S.L.cp_righttable_pos) s0
+		l0 0 <
+		{if}
+			0 (S.L.cp_righttable_pos)		
+		{endif}
+		l0 1 >
+		{if}
+			1 (S.L.cp_righttable_pos)
+		{endif}
+
+		(L.L.cp_righttable_angle) (S.L.cp_righttable_lastangle)
+
+		(L.S.mouse_x) 500 / (L.L.cp_righttable_angle) + (S.L.cp_righttable_angle) s0
+		l0 0 <
+		{if}
+			0 (S.L.cp_righttable_angle)		
+		{endif}
+		l0 1 >
+		{if}
+			1 (S.L.cp_righttable_angle)
+		{endif}
+	{endif}
+{end}
+
+{trigger:cp_column_drag}
+	(L.L.cp_righttable_sw)
+	{if}
+		(L.L.cp_column_pos) (S.L.cp_column_lastpos)
+
+		(L.S.mouse_y) 500 / (L.L.cp_column_pos) + (S.L.cp_column_pos) s0
+		l0 0 <
+		{if}
+			0 (S.L.cp_column_pos)		
+		{endif}
+		l0 1 >
+		{if}
+			1 (S.L.cp_column_pos)
+		{endif}
+
+		(L.L.cp_column_angle) (S.L.cp_column_lastangle)
+
+		(L.S.mouse_x) 500 / (L.L.cp_column_angle) + (S.L.cp_column_angle) s0
+		l0 0 <
+		{if}
+			0 (S.L.cp_column_angle)		
+		{endif}
+		l0 1 >
+		{if}
+			1 (S.L.cp_column_angle)
+		{endif}
+	{endif}
+{end}
+
+{trigger:cp_Fahrertuer_drag}
+	(L.L.cp_cabdoorhandle_pos) (L.L.cp_fahrertuer_pos) ||
+	{if}
+		1 (S.L.cp_fahrertuer_dragged)
+		(L.L.cp_fahrertuer_pos) (S.L.cp_fahrertuer_lastpos)
+
+		(L.S.mouse_x) -500 / (L.L.cp_fahrertuer_pos) + (S.L.cp_fahrertuer_pos) s0
+		l0 0 <
+		{if}
+			0 (S.L.cp_fahrertuer_pos)
+			0 (S.L.cp_cabdoorhandle_pos)		
+		{endif}
+		l0 1 >
+		{if}
+			1 (S.L.cp_fahrertuer_pos)
+		{endif}
+
+		(L.L.cp_fahrertuer_pos) (L.L.cp_fahrertuer_lastpos) - (L.S.Timegap) / (S.L.cp_fahrertuer_speed)
+	{endif}
+{end}
+
+{trigger:cp_Fahrertuer_off}
+	0 (S.L.cp_fahrertuer_dragged)
+{end}
+
+
+{trigger:cp_manual_toggle}
+	(L.L.cp_manual) ! (S.L.cp_manual)
+
+	(L.L.cp_manual)
+	{if}
+		0 (S.L.manual)
+		1 (S.L.manual1)
+	{else}
+		1 (S.L.manual)
+		0 (S.L.manual1)
+	{endif}		
+
+{end}
+
+{trigger:cp_tfl_manual_toggle}
+	(L.L.cp_tfl_manual) ! (S.L.cp_tfl_manual)
+
+	(L.L.cp_tfl_manual)
+	{if}
+		0 (S.L.tfl_manual)
+		1 (S.L.tfl_manual1)
+	{else}
+		1 (S.L.tfl_manual)
+		0 (S.L.tfl_manual1)
+	{endif}		
+
+{end}
+
+{trigger:cp_mo_manual_toggle}
+	(L.L.cp_mo_manual) ! (S.L.cp_mo_manual)
+
+	(L.L.cp_mo_manual)
+	{if}
+		0 (S.L.mo_manual)
+		1 (S.L.mo_manual1)
+	{else}
+		1 (S.L.mo_manual)
+		0 (S.L.mo_manual1)
+	{endif}		
+
+{end}
+
+{trigger:cp_schedule_toggle}
+	(L.L.cp_schedule) ! (S.L.cp_schedule)
+
+	(L.L.cp_schedule)
+	{if}
+		0 (S.L.schedule)
+		1 (S.L.schedule1)
+	{else}
+		1 (S.L.schedule)
+		0 (S.L.schedule1)
+	{endif}		
+
+{end}
+
+{trigger:cp_adverts_toggle}
+	(L.L.cp_adverts) 1 + (S.L.cp_adverts) 3 >
+	{if}
+		0 (S.L.cp_adverts)
+	{endif}
+	0 (S.L.adverts_loadvar)
+	(M.L.adverts_load)
+{end}
+
+{trigger:cp_ACUnit_toggle}
+	(L.L.cp_ACUnit) ! (S.L.cp_ACUnit)
+
+	(L.L.cp_ACUnit)
+	{if}
+		1 (S.L.ACUnit_mode)
+		0 (S.L.ACUnit_loadvar)
+                (M.L.ACUnit_load)
+	{else}
+		0 (S.L.ACUnit_mode)
+		0 (S.L.ACUnit_loadvar)
+                (M.L.ACUnit_load)
+	{endif}
+
+{end}
+
+{trigger:cp_fleetnumber_toggle}
+	(L.L.cp_fleetnumber) ! (S.L.cp_fleetnumber)
+
+	(L.L.cp_fleetnumber)
+	{if}
+		1 (S.L.fleetnumber_mode)
+		0 (S.L.fleetnumber_loadvar)
+                (M.L.fleetnumber_load)
+	{else}
+		0 (S.L.fleetnumber_mode)
+		0 (S.L.fleetnumber_loadvar)
+                (M.L.fleetnumber_load)
+	{endif}	
+
+{end}
+
+{trigger:cp_fog_toggle}
+	(L.L.cp_fog) ! (S.L.cp_fog)
+
+	(L.L.cp_fog)
+	{if}
+		1 (S.L.fog_mode)
+		0 (S.L.fog_loadvar)
+                (M.L.fog_load)
+	{else}
+		0 (S.L.fog_mode)
+		0 (S.L.fog_loadvar)
+                (M.L.fog_load)
+	{endif}
+
+{end}
+	
+{trigger:cp_window_toggle}
+	(L.L.cp_window) ! (S.L.cp_window)
+
+	(L.L.cp_window)
+	{if}
+		1 (S.L.window_mode)
+		0 (S.L.window_loadvar)
+                (M.L.window_load)
+	{else}
+		0 (S.L.window_mode)
+		0 (S.L.window_loadvar)
+                (M.L.window_load)
+	{endif}
+
+{end}
+
+{trigger:cp_cashbox_toggle}
+	(L.L.cp_cashbox) ! (S.L.cp_cashbox)
+
+	(L.L.cp_cashbox)
+	{if}
+		1 (S.L.cashbox_mode)
+		0 (S.L.cashbox_loadvar)
+                (M.L.cashbox_load)
+	{else}
+		0 (S.L.cashbox_mode)
+		0 (S.L.cashbox_loadvar)
+                (M.L.cashbox_load)
+	{endif}	
+
+{end}
+
+'----------------------
+'	Init
+'----------------------
+
+{macro:cockpit_init}
+	0 (S.L.cockpit_hupe_volume) (S.L.cp_cashBoxLid_pos)
+	1 (S.L.cp_lenkrad_visible)
+
+	0 (S.L.manual)
+	1 (S.L.manual1)
+	
+	0 (S.L.mo_manual)
+	1 (S.L.mo_manual1)
+
+	0 (S.L.tfl_manual)
+	1 (S.L.tfl_manual1)
+
+	0 (S.L.schedule)
+	1 (S.L.schedule1)	
+	
+	0 (S.L.adverts_loadvar) (S.L.Cashbox_loadvar) (S.L.ACUnit_loadvar)
+	1 (S.L.FleetNumber_loadvar)	(S.L.Fog_loadvar) (S.L.Window_loadvar)
+{end}
+
+'----------------------
+'	Frame
+'----------------------
+{macro:cockpit_frame}
+	(L.L.elec_busbar_aux)
+	{if}
+		(L.L.cockpit_gangD) (L.L.antrieb_getr_gangwahl) 2 < && s0
+		(L.L.cockpit_gangR) (L.L.antrieb_getr_gangwahl) 0 > && s1 ||
+		{if}
+			(L.L.cockpit_DNRbutt_blink) (L.S.Timegap) - d 0 < 0.8 * +
+		{else}
+			(L.L.cockpit_gangD) (L.L.cockpit_gangR) ||
+		{endif}
+		(S.L.cockpit_DNRbutt_blink)
+
+		(L.L.Screen_booted) ! (L.L.cockpit_gangD) (L.L.cockpit_DNRbutt_blink) 0.4 > && || (S.L.cockpit_Dbutt_lit2) ! (S.L.cockpit_Dbutt_lit1)
+		(L.L.Screen_booted) ! (L.L.cockpit_gangN) || (S.L.cockpit_Nbutt_lit2) ! (S.L.cockpit_Nbutt_lit1)
+		(L.L.Screen_booted) ! (L.L.cockpit_gangR) (L.L.cockpit_DNRbutt_blink) 0.4 > && || (S.L.cockpit_Rbutt_lit2) ! (S.L.cockpit_Rbutt_lit1)
+	{else}
+		0 (S.L.cockpit_Dbutt_lit2) (S.L.cockpit_Dbutt_lit1) (S.L.cockpit_Nbutt_lit2) (S.L.cockpit_Nbutt_lit1) (S.L.cockpit_Rbutt_lit2) (S.L.cockpit_Rbutt_lit1) (S.L.cockpit_DNRbutt_blink)
+	{endif}
+
+	(L.L.Driver_Seat_VertTransl) (S.L.seat_pos)
+
+	(L.L.cockpit_reverseWarningOff) ! (L.L.cockpit_gangR) (L.L.elec_busbar_aux) && && (S.L.reverse_sound_play)
+	
+'	Convert indicator switch position to indicator stalk rotation:
+	(L.L.lights_sw_blinker) s0
+	l0 0 =
+	{if}
+		0
+	{else}
+	l0 1 =
+	{if}
+		-1
+	{else}
+		1
+	{endif}
+	{endif}
+	(S.L.cockpit_blinkerhebel)
+
+	(L.L.elec_busbar_main)
+	{if}
+		(L.L.cp_cctv_active) s0
+		{if}
+			l0 (L.L.door_2) (L.L.door_3) || ! (L.S.Timegap) * - 0 max
+		{else}
+			(L.L.door_2) (L.L.door_3) || 3 *
+		{endif}
+		(S.L.cp_cctv_active) 0 > (S.L.cp_cctv_visible)
+	{else}
+		0 (S.L.cp_cctv_active) (S.L.cp_cctv_visible)
+	{endif}
+
+	(M.L.tacho_frame)
+	(M.L.drehzahlmesser_frame)
+	(M.L.hupe_frame)
+	(M.L.cockpitlights_frame)
+	(M.L.fahrertuer_frame)
+	(M.L.ramp_frame)
+	(M.L.air_pressure_gauge_frame)
+	(M.L.adverts_load) (M.L.adverts_module)
+	(M.L.ACUnit_load)
+	(M.L.fleetnumber_load)
+	(M.L.window_load)
+	(M.L.cashbox_load)
+	(M.L.Fog_load)
+{end}
+
+{macro:tacho_frame}
+	(L.L.Velocity) (F.L.cockpit_tacholinie) (L.L.elec_busbar_main) 0 > * (S.L.cockpit_tachowinkel)
+{end}
+
+{macro:drehzahlmesser_frame}
+	(L.L.engine_n) 3000 235 / / (L.L.elec_busbar_main) 0 > * (S.L.cockpit_drehzahlwinkel)
+{end}
+
+{macro:hupe_frame}
+	(L.L.elec_busbar_main) (C.L.elec_busbar_minV) >
+	{if}
+		(L.L.cockpit_hupe) 1 =
+		{if}
+			(L.L.cockpit_hupe_volume) 1 <
+			{if}
+				(L.L.cockpit_hupe_volume) (L.S.Timegap) 10 * + (S.L.cockpit_hupe_volume)
+			{else}
+				1 (S.L.cockpit_hupe_volume)
+			{endif}
+		{else}
+			(L.L.cockpit_hupe_volume) 0 >
+			{if}
+				(L.L.cockpit_hupe_volume) (L.S.Timegap) 10 * - (S.L.cockpit_hupe_volume)
+			{else}
+				0 (S.L.cockpit_hupe_volume)
+			{endif}
+		{endif}
+	{else}
+		(L.L.cockpit_hupe_volume) 0 >
+		{if}
+			(L.L.cockpit_hupe_volume) (L.S.Timegap) 10 * - (S.L.cockpit_hupe_volume)
+		{else}
+			0 (S.L.cockpit_hupe_volume)
+		{endif}
+	{endif}
+{end}
+
+{macro:wischerhebel_frame}
+	(L.L.cockpit_wischerhebel_lastmode) (L.L.cockpit_wischerhebel_mode) = !
+	{if}
+		(T.L.ev_wischerhebel)
+	{endif}
+	(L.L.cockpit_wischerhebel_mode) (S.L.cockpit_wischerhebel_lastmode)
+{end}
+
+{macro:wischer_drehschalter_frame}
+	(L.L.cockpit_wischer_drehschalter_lastmode) (L.L.cockpit_wischer_drehschalter_mode) = !
+	{if}
+		(T.L.ev_wischerhebel)
+	{endif}
+	(L.L.cockpit_wischer_drehschalter_mode) (S.L.cockpit_wischer_drehschalter_lastmode)
+{end}
+
+{macro:cockpitlights_frame}
+'	Strungsmelder
+	(L.L.engine_n) 100 <
+	(L.L.bremse_p_tank01) 650000 < ||
+	(L.L.bremse_p_tank02) 650000 < ||
+	(L.L.bremse_p_tank03) 650000 < ||
+	(L.L.elec_busbar_aux) *
+	(S.L.cockpit_light_masterfailure)
+
+'	Batterie
+	(L.L.elec_ladekontrolle) (L.L.elec_busbar_aux) *
+	(S.L.cockpit_light_batterie)
+
+'	Kontrolle Feststellbremse
+	(L.L.bremse_p_Brzyl_FBA) 650000 <
+	(L.L.elec_busbar_main) *
+	(S.L.cockpit_light_feststellbremse)
+
+	(L.L.cp_fahrerlicht_sw) (L.L.elec_busbar_main) *
+	(S.L.cockpit_light_fahrerlicht)
+
+	(L.L.cp_licht_unterdeck_sw) (L.L.elec_busbar_main) *
+	(S.L.cockpit_light_licht_unterdeck)
+
+	(L.L.cp_licht_oberdeck_sw) (L.L.elec_busbar_main) *
+	(S.L.cockpit_light_licht_oberdeck)
+{end}
+
+{macro:air_pressure_gauge_frame}
+	(L.L.elec_busbar_main)
+	{if}
+		(L.L.bremse_p_tank01) 10000 / (S.L.cockpit_bremse_winkel_f)
+		(L.L.bremse_p_tank02) 10000 / (S.L.cockpit_bremse_winkel_r)
+	{else}
+		0 (S.L.cockpit_bremse_winkel_f) (S.L.cockpit_bremse_winkel_r)
+	{endif}
+{end}
+
+{macro:traegheit}
+
+'Simuliert trges Verhalten (exponentiell)
+
+'Ladekonventionen:
+'	Sollwert		l0
+'	Istwert			l1
+'	Konstante Anlauf	l2 (Einheiten/s)
+'	Konstante Ablauf	l3 (Einheiten/s)
+
+'Anlauf oder Auslauf?
+	l0 l1 > 
+	{if}
+		l2 (L.S.Timegap) * 1 min -1 max s4
+	{else}
+		l3 (L.S.Timegap) * 1 min -1 max s4
+	{endif}
+
+
+'Sollwert:
+	l0
+'Istwert:
+	l1
+'Beschleunigung:
+	- l4 *
+'Addition zum Istwert:
+	l1 + s1
+{end}
+
+{macro:fahrertuer_frame}
+	(L.L.cp_fahrertuer_dragged) !
+	{if}
+		(L.L.cp_fahrertuer_pos) (L.S.Timegap) (L.L.cp_fahrertuer_speed) * + (S.L.cp_fahrertuer_pos)
+
+		(L.L.cp_fahrertuer_pos) 1 >
+		{if}
+			1 (S.L.cp_fahrertuer_pos)
+			(L.L.cp_fahrertuer_speed) /-/ 0.7 * (S.L.cp_fahrertuer_speed)
+		{endif}
+		(L.L.cp_fahrertuer_pos) 0 <
+		{if}
+			0 (S.L.cp_fahrertuer_speed) (S.L.cp_fahrertuer_pos) (S.L.cp_cabdoorhandle_pos)
+		{endif}
+
+		(L.L.cp_fahrertuer_pos) 0 >
+		{if}
+			(L.L.cp_fahrertuer_speed) (L.S.Timegap) (L.L.A_Trans_Y) (C.L.cp_fahrertuer_anschlagseite) * (L.L.A_Trans_X) + 0.3 * (L.L.cp_fahrertuer_globalangle) * * + (S.L.cp_fahrertuer_speed)
+		{endif}
+	
+		(L.L.cp_fahrertuer_speed) s0 (S.L.cp_fahrertuer_lastspeed)
+		l0 0 >
+		{if}
+			l0 (L.S.Timegap) 0.2 * - (S.L.cp_fahrertuer_speed)
+		{endif}
+		l0 0 <
+		{if}
+			l0 (L.S.Timegap) 0.2 * + (S.L.cp_fahrertuer_speed)
+		{endif}
+
+
+		(L.L.cp_fahrertuer_speed) 0 > (L.L.cp_fahrertuer_lastspeed) 0 < &&
+		(L.L.cp_fahrertuer_speed) 0 < (L.L.cp_fahrertuer_lastspeed) 0 > && ||
+		{if}
+			0 (S.L.cp_fahrertuer_speed)
+		{endif}	 
+	
+	{endif}
+
+	(L.L.cp_fahrertuer_pos) 0 > (L.L.cp_fahrertuer_open) ! &&
+	{if}
+		1 (S.L.cp_fahrertuer_open)
+	{endif}
+
+	(L.L.cp_fahrertuer_pos) 0 = (L.L.cp_fahrertuer_open) &&
+	{if}
+		(T.L.ev_fahrertuer_zu)
+		0 (S.L.cp_fahrertuer_open)
+	{endif}
+
+	(L.L.cp_fahrertuer_pos) 140 * 27 + 3.14 * 180 / sin (S.L.cp_fahrertuer_globalangle) 
+
+	(L.L.velocity) (L.L.cp_velocity_last) - (S.L.cp_acceleration)
+	(L.L.velocity) (S.L.cp_velocity_last)
+{end}
+
+{macro:ramp_frame}
+
+	(L.L.cp_ramp_dragged) !
+	{if}
+		(L.L.cp_ramp_pos) (L.S.Timegap) (L.L.cp_ramp_speed) * + (S.L.cp_ramp_pos)
+
+		(L.L.cp_ramp_pos) 1 >
+		{if}
+			1 (S.L.cp_ramp_pos)
+			(L.L.cp_ramp_speed) /-/ 0.7 * (S.L.cp_ramp_speed)
+		{endif}
+		(L.L.cp_ramp_pos) 0 <
+		{if}
+			0 (S.L.cp_ramp_speed) (S.L.cp_ramp_pos)
+		{endif}
+
+		(L.L.cp_ramp_pos) 0 >
+		{if}
+			(L.L.cp_ramp_speed) (L.S.Timegap) (L.L.A_Trans_Y) (C.L.cp_ramp_anschlagseite) * (L.L.A_Trans_X) /-/ + 0.3 * (L.L.cp_ramp_globalangle) * * + (S.L.cp_ramp_speed)
+		{endif}
+	
+		(L.L.cp_ramp_speed) s0 (S.L.cp_ramp_lastspeed)
+		l0 0 >
+		{if}
+			l0 (L.S.Timegap) 0.2 * - (S.L.cp_ramp_speed)
+		{endif}
+		l0 0 <
+		{if}
+			l0 (L.S.Timegap) 0.2 * + (S.L.cp_ramp_speed)
+		{endif}
+
+
+		(L.L.cp_ramp_speed) 0 > (L.L.cp_ramp_lastspeed) 0 < &&
+		(L.L.cp_ramp_speed) 0 < (L.L.cp_ramp_lastspeed) 0 > && ||
+		{if}
+			0 (S.L.cp_ramp_speed)
+		{endif}	 
+	
+	{endif}
+
+	(L.L.cp_ramp_pos) 0 > (L.L.cp_ramp_open) ! &&
+	{if}
+		(T.L.ev_fahrertuer_auf)
+		1 (S.L.cp_ramp_open)
+	{endif}
+
+	(L.L.cp_ramp_pos) 0 = (L.L.cp_ramp_open) &&
+	{if}
+		(T.L.ev_fahrertuer_zu)
+		0 (S.L.cp_ramp_open)
+	{endif}
+
+	(L.L.cp_ramp_pos) 140 * 27 + 3.14 * 180 / sin (S.L.cp_ramp_globalangle) 
+
+	(L.L.velocity) (L.L.cp_velocity_last) - (S.L.cp_acceleration)
+	(L.L.velocity) (S.L.cp_velocity_last)
+{end}
+
+{trigger:cp_scheduleView}
+	(L.L.scheduleView) ! (S.L.scheduleView)
+	{if}
+		(T.L.ev_scheduleSound1)
+	{else}
+		(T.L.ev_scheduleSound2)
+	{endif}
+{end}
+
+{macro:adverts_module}
+	l0 0.5 <=
+	{if}
+		0 s1
+		0 s2
+	{else}
+	l0 1.5 <=
+	{if}
+		1 s1
+		0 s2
+	{else}
+	l0 2 =
+	{if}
+		2 s1
+		1 s2
+	l0 2.5 >
+	{if}
+		3 s2
+		0 s3
+	{else}
+		0 s1
+		0 s2
+	{endif}
+	{endif}
+	{endif}
+	{endif}
+{end}
+
+{macro:adverts_load}
+
+	(L.L.adverts_loadvar) 1 =
+	{if}
+		(L.L.use_adverts) 0 = 
+		{if}
+			0 (S.L.adverts)
+			0 (S.L.adverts1)
+		{endif}
+
+		(L.L.use_adverts) 1 = 
+		{if}		
+			1 (S.L.adverts)
+			0 (S.L.adverts1)
+		{endif}
+		
+		(L.L.use_adverts) 2 = 
+		{if}		
+			2 (S.L.adverts)
+			1 (S.L.adverts1)
+		{endif}
+		
+		(L.L.use_adverts) 3 = 
+		{if}		
+			3 (S.L.adverts)
+			0 (S.L.adverts1)
+		{endif}		
+	{endif}
+
+
+	(L.L.adverts_loadvar) 0 =
+	{if}
+		(L.L.cp_adverts) 0.5 <=
+		{if}
+			0 (S.L.adverts)
+			0 (S.L.adverts1)
+		{else}
+			(L.L.cp_adverts) 1.5 <=
+			{if}
+				1 (S.L.adverts)
+				0 (S.L.adverts1)
+			{else}
+				(L.L.cp_adverts) 2.5 <=
+				{if}
+					2 (S.L.adverts)
+					1 (S.L.adverts1)
+				{else}
+					(L.L.cp_adverts) 3.5 >
+					{if}
+						3 (S.L.adverts)
+						0 (S.L.adverts1)
+					{else}
+						0 (S.L.adverts)
+						0 (S.L.adverts1)
+					{endif}	
+				{endif}
+			{endif}
+		{endif}
+	{endif}
+	
+{end}
+
+{macro:ACUnit_load}
+
+	(L.L.ACUnit_loadvar) 1 =
+	{if}
+		(L.L.use_ACUnit) 0 = 
+		{if}		
+			0 (S.L.ACUnit_vis)
+		{endif}
+
+		(L.L.use_ACUnit) 1 = 
+		{if}		
+			1 (S.L.ACUnit_vis)
+		{endif}
+	{endif}
+
+	(L.L.ACUnit_loadvar) 0 =
+	{if}
+		(L.L.ACUnit_mode) 0 = 
+		{if}		
+			0 (S.L.ACUnit_vis)
+		{endif}
+
+		(L.L.ACUnit_mode) 1 = 
+		{if}		
+			1 (S.L.ACUnit_vis)
+		{endif}
+	{endif}
+	
+{end}
+
+{macro:fleetnumber_load}
+
+	(L.L.fleetnumber_loadvar) 1 =
+	{if}
+		(L.L.use_fleetnumber) 0 = 
+		{if}		
+			0 (S.L.fleetnumber_vis)
+		{endif}
+
+		(L.L.use_fleetnumber) 1 = 
+		{if}		
+			1 (S.L.fleetnumber_vis)
+		{endif}
+	{endif}
+
+	(L.L.fleetnumber_loadvar) 0 =
+	{if}
+		(L.L.fleetnumber_mode) 0 = 
+		{if}		
+			0 (S.L.fleetnumber_vis)
+		{endif}
+
+		(L.L.fleetnumber_mode) 1 = 
+		{if}		
+			1 (S.L.fleetnumber_vis)
+		{endif}
+	{endif}
+	
+{end}
+
+{macro:cashbox_load}
+
+	(L.L.cashbox_loadvar) 1 =
+	{if}
+		(L.L.use_cashbox) 0 = 
+		{if}		
+			0 (S.L.cashbox_vis)
+		{endif}
+
+		(L.L.use_cashbox) 1 = 
+		{if}		
+			1 (S.L.cashbox_vis)
+		{endif}
+	{endif}
+
+	(L.L.cashbox_loadvar) 0 =
+	{if}
+		(L.L.cashbox_mode) 0 = 
+		{if}		
+			0 (S.L.cashbox_vis)
+		{endif}
+
+		(L.L.cashbox_mode) 1 = 
+		{if}		
+			1 (S.L.cashbox_vis)
+		{endif}
+	{endif}
+	
+{end}
+
+{macro:fog_load}
+
+	(L.L.fog_loadvar) 1 =
+	{if}
+		(L.L.use_fog) 0 = 
+		{if}		
+			0 (S.L.fog_vis)
+		{endif}
+
+		(L.L.use_fog) 1 = 
+		{if}		
+			1 (S.L.fog_vis)
+		{endif}
+	{endif}
+
+	(L.L.fog_loadvar) 0 =
+	{if}
+		(L.L.fog_mode) 0 = 
+		{if}		
+			0 (S.L.fog_vis)
+		{endif}
+
+		(L.L.fog_mode) 1 = 
+		{if}		
+			1 (S.L.fog_vis)
+		{endif}
+	{endif}
+	
+{end}
+
+{macro:window_load}
+
+	(L.L.window_loadvar) 1 =
+	{if}
+		(L.L.use_window) 0 = 
+		{if}		
+			0 (S.L.window_vis)
+		{endif}
+
+		(L.L.use_window) 1 = 
+		{if}		
+			1 (S.L.window_vis)
+		{endif}
+	{endif}
+
+	(L.L.window_loadvar) 0 =
+	{if}
+		(L.L.window_mode) 0 = 
+		{if}		
+			0 (S.L.window_vis)
+		{endif}
+
+		(L.L.window_mode) 1 = 
+		{if}		
+			1 (S.L.window_vis)
+		{endif}
+	{endif}
+	
+{end}
+
+
+{macro:cp_updateWiperMode}
+	(L.L.cockpit_indicatorStalk_Wiper_mode) s0
+	(L.L.cockpit_indicatorStalk_Wiper_rot) 0.5 + trunc (S.L.cockpit_indicatorStalk_Wiper_mode) s1
+	
+	l0 = !
+	{if}
+		l1 1 = (S.L.wiper_intervall_sw)
+		l1 1 > (S.L.wiper_einaus_sw)
+		l1 3 = (S.L.wiper_schnell_sw)
+		
+		(T.L.ev_multifunction_change)
+	{endif}
+{end}
+
+{macro:cp_btn_doors_openFront_pressed}
+	1 (S.L.cockpit_tuertaster1)
+	(T.L.cp_doorbutton)
+	
+	(M.L.trg_bus_door01_open)
+{end}
+
+{macro:cp_btn_doors_openFront_released}
+	0 (S.L.cockpit_tuertaster1)
+{end}
+
+{macro:cp_btn_doors_openFront_em_pressed}
+	1 (S.L.cockpit_tuertaster1)
+	(T.L.cp_doorbutton)
+	
+	(M.L.trg_bus_door01_open)
+{end}
+
+{macro:cp_btn_doors_openFront_em_released}
+	0 (S.L.cockpit_tuertaster1)
+{end}
+
+{macro:cp_btn_doors_closeFront_pressed}
+	1 (S.L.cockpit_tuertaster2)
+	(T.L.cp_doorbutton)
+	
+	(M.L.trg_bus_door01_close)
+{end}
+
+{macro:cp_btn_doors_closeFront_released}
+	0 (S.L.cockpit_tuertaster2)
+{end}
+
+{macro:cp_btn_doors_closeFront_em_pressed}
+	1 (S.L.cockpit_tuertaster2)
+	(T.L.cp_doorbutton)
+	
+	(M.L.trg_bus_door01_close)
+{end}
+
+{macro:cp_btn_doors_closeFront_em_released}
+	0 (S.L.cockpit_tuertaster2)
+{end}
+
+{macro:cp_btn_doors_front_pressed}
+	1 (S.L.cockpit_tuertaster1)
+	(T.L.cp_doorbutton)
+	(M.L.trg_bus_door01_open)
+{end}
+
+{macro:cp_btn_doors_front_released}
+	0 (S.L.cockpit_tuertaster1)
+{end}
+
+{macro:cp_btn_doors_openrear_em_pressed}
+	1 (S.L.cockpit_tuertaster2)
+	(T.L.cp_doorbutton)
+	(M.L.trg_bus_door23_open)
+{end}
+
+{macro:cp_btn_doors_openrear_em_released}
+	0 (S.L.cockpit_tuertaster2)
+{end}
+
+{macro:cp_btn_doors_closerear_em_pressed}
+	1 (S.L.cockpit_tuertaster2)
+	(T.L.cp_doorbutton)
+	
+	(M.L.trg_bus_door23_close)
+{end}
+
+{macro:cp_btn_doors_closerear_em_released}
+	0 (S.L.cockpit_tuertaster2)
+{end}
+
+{macro:cp_btn_doors_rear_pressed}
+	1 (S.L.cockpit_tuertaster2)
+	(T.L.cp_doorbutton)
+	(M.L.trg_bus_door01_close)
+{end}
+
+{macro:cp_btn_doors_rear_released}
+	0 (S.L.cockpit_tuertaster2)
+{end}

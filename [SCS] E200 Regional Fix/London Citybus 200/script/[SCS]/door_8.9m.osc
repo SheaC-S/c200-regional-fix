@@ -1,0 +1,452 @@
+'##############
+'Door Script
+'##############
+
+'Controls Doors (this version customised for C400(R) door operation)
+
+'(c) 2007-2009 Rudiger Hulsmann
+'(c) 2007-2013 Marcel Kuhnt
+'(c) 2011 Markus Rabe
+'(c) 2016-2018 Nathan Burnham (Road-hog123)
+
+' Runs when:
+' - Front door emergency button is pressed
+{trigger:door_external_front}
+	(L.L.doorTarget_01)
+	{if}
+		(M.L.trg_bus_door01_close)
+	{else}
+		(M.L.trg_bus_door01_open)
+	{endif}
+{end}
+
+
+{macro:Door_Init}
+	1000 random 500 / 1 - (C.L.door_acc_var) * (C.L.fdoor_acc) + (S.L.doorAcc_0)
+	1000 random 500 / 1 - (C.L.door_acc_var) * (C.L.fdoor_acc) + (S.L.doorAcc_1)
+	1000 random 500 / 1 - (C.L.door_acc_var) * (C.L.bdoor_acc) + (S.L.doorAcc_2)
+	1000 random 500 / 1 - (C.L.door_acc_var) * (C.L.bdoor_acc) + (S.L.doorAcc_3)
+
+	1000 random 500 / 1 - (C.L.door_maxspeed_var) * (C.L.fdoor_maxspeed) + (S.L.doorMaxSpeed_0_norm)
+	1000 random 500 / 1 - (C.L.door_maxspeed_var) * (C.L.fdoor_maxspeed) + (S.L.doorMaxSpeed_1_norm)
+
+'Beim Dmpfer wird der Wert bis auf 40% reduziert statt eine Varianz verwendet:
+	1000 random 0.0009 * 0.1 + (C.L.door0_damper) * (S.L.doorDamper_0_kennwert)
+	1000 random 0.0009 * 0.1 + (C.L.door1_damper) * (S.L.doorDamper_1_kennwert)
+
+	(C.L.door_refl) (S.L.doorRefl_0)
+	(C.L.door_refl) (S.L.doorRefl_1)
+
+	0
+	(S.L.door_pressure_open_0)
+	(S.L.door_pressure_close_0)
+	(S.L.door_pressure_open_1)
+	(S.L.door_pressure_close_1)
+
+	(S.L.doorDamper_0) (S.L.doorDamper_1)
+{end}
+
+{macro:Door_Frame}
+	(M.L.Door0_Calc)
+	(M.L.Door1_Calc)
+	(M.L.Door2_Calc)
+	(M.L.Door2_framex)
+	(M.L.Door2_framey)
+	(M.L.Door3_Calc)
+	(M.L.Door3_framex)
+	(M.L.Door3_framey)
+	(L.L.door_0) 0.9 > (L.L.door_1) 0.9 > && (S.L.PAX_Entry0_Open) (S.L.PAX_Exit0_Open) (S.L.PAX_Exit1_Open)
+'	(L.L.door_2) 0.9 > (L.L.door_3) 0.9 > && (S.L.PAX_Entry1_Open) (S.L.PAX_Exit0_Open) (S.L.PAX_Exit1_Open)
+	
+	(L.L.door_0) 0.05 - 10 * 1 min 0 max (S.L.door_0_flap)
+	(L.L.door_1) 0.05 - 10 * 1 min 0 max (S.L.door_1_flap)
+	
+	(L.L.Velocity) abs (C.L.door_lock_speed) >
+	{if}
+		(L.L.doorLock_01) ! (L.L.door_0) (L.L.door_1) || ! &&
+		{if}
+			(T.L.ev_doorLock_01)
+			1 (S.L.doorLock_01)
+		{endif}
+		
+		(L.L.doorLock_23) ! (L.L.door_2) (L.L.door_3) || ! &&
+		{if}
+			(T.L.ev_doorLock_23)
+			1 (S.L.doorLock_23)
+		{endif}
+	{else}
+	(L.L.Velocity) abs (C.L.door_unlock_speed) <
+	{if}
+		(L.L.doorLock_01)
+		{if}
+			(T.L.ev_doorUnlock_01)
+			0 (S.L.doorLock_01)
+		{endif}
+		
+		(L.L.doorLock_23)
+		{if}
+			(T.L.ev_doorUnlock_23)
+			0 (S.L.doorLock_23)
+		{endif}
+	{endif}
+	{endif}
+	
+	(L.L.PAX_Exit0_Open) (L.L.PAX_Exit1_Open) || (L.L.elec_busbar_main) ! ||
+	{if}
+		0 (S.L.haltewunsch) (S.L.haltewunschlampe)
+	{else}
+		(L.L.haltewunsch) ! (L.L.PAX_Exit0_Req) (L.L.PAX_Exit1_Req) || &&
+		{if}
+			(S.L.haltewunsch) (S.L.haltewunschlampe)
+			(T.L.ev_stop)
+		{endif}
+	{endif}
+
+'###############################################################################################
+' Dmpferverhalten:
+
+	(L.L.doorSpeed_0) 0 >
+	{if}
+		(L.L.door_0) (F.L.damper_f_open)
+	{else}
+		(L.L.door_0) (F.L.damper_f_close)
+	{endif}
+	(L.L.doorSpeed_0) * s0
+	(L.L.doorDamper_0) s1
+	3 s2 3 s3
+	(M.L.traegheit)
+	(S.L.doorDamper_0)
+
+'........................
+
+	(L.L.doorSpeed_1) 0 >
+	{if}
+		(L.L.door_1) (F.L.damper_f_open)
+	{else}
+		(L.L.door_1) (F.L.damper_f_close)
+	{endif}
+	(L.L.doorSpeed_1) * s0
+	(L.L.doorDamper_1) s1
+	3 s2 3 s3
+	(M.L.traegheit)
+	(S.L.doorDamper_1)
+
+'........................
+
+	(L.L.doorSpeed_2) 0 >
+	{if}
+		(L.L.door_2) (F.L.damper_b_open)
+	{else}
+		(L.L.door_2) (F.L.damper_b_close)
+	{endif}
+	(L.L.doorSpeed_2) * s0
+	(L.L.doorDamper_2) s1
+	3 s2 3 s3
+	(M.L.traegheit)
+	(S.L.doorDamper_2)
+
+'........................
+
+	(L.L.doorSpeed_3) 0 >
+	{if}
+		(L.L.door_3) (F.L.damper_b_open)
+	{else}
+		(L.L.door_3) (F.L.damper_b_close)
+	{endif}
+	(L.L.doorSpeed_3) * s0
+	(L.L.doorDamper_3) s1
+	3 s2 3 s3
+	(M.L.traegheit)
+	(S.L.doorDamper_3)
+
+'........................
+
+
+'###############################################################################################
+'###############################################################################################
+'	AI-Ablauf:
+
+(L.L.AI_Scheduled_AtStation) s0
+1 =
+{if}
+	(L.L.Velocity) 3 <
+	{if}
+		(M.L.trg_bus_door01_open)
+		(L.L.PAX_Exit0_Req) (L.L.PAX_Exit1_Req) ||
+		{if}
+			(M.L.trg_bus_door23_open)
+		{endif}
+	{endif}
+{else}
+l0 -1 =
+{if}
+	(M.L.trg_bus_door01_close)
+	(L.L.doorTarget_23)
+	{if}
+		(M.L.trg_bus_door23_close)
+	{endif}
+	
+	(L.L.door_0) (L.L.door_1) (L.L.door_2) (L.L.door_3) + + + 0.1 <
+	{if}
+		0 (S.L.AI_Scheduled_AtStation)
+	{endif}
+{endif}
+{endif}
+
+
+{end}
+
+{macro:Door0_Calc}
+	(L.L.doorTarget_01)
+	{if}
+		(L.L.door_0) (F.L.door_0_opn_speed) (S.L.doorMaxSpeed_0)
+	{else}
+		(L.L.door_0) (F.L.door_0_cls_speed) (S.L.doorMaxSpeed_0)
+	{endif}
+
+	(L.L.doorTarget_01) ! (L.L.doorSpeed_0) s0 abs 0.05 > (L.L.door_0) 0 > || && 
+	{if}
+		l0 /-/ (L.L.doorMaxSpeed_0) <
+		{if}
+			(L.L.doorSpeed_0) (L.L.doorAcc_0) (L.S.Timegap) * - (S.L.doorSpeed_0)
+		{else}
+			(L.L.doorSpeed_0) (L.L.doorAcc_0) (L.S.Timegap) * + (S.L.doorSpeed_0)
+		{endif}
+		(L.L.door_0) (L.L.doorSpeed_0) (L.S.Timegap) * + (S.L.door_0)
+	{else}
+		(L.L.doorSpeed_0) abs 0.05 > (L.L.door_0) 1 < || (L.L.doorTarget_01) &&
+		{if}
+			l0 (L.L.doorMaxSpeed_0) <
+			{if}
+				(L.L.doorSpeed_0) (L.L.doorAcc_0) (L.S.Timegap) * + (S.L.doorSpeed_0) 
+			{else}
+				(L.L.doorSpeed_0) (L.L.doorAcc_0) (L.S.Timegap) * - (S.L.doorSpeed_0) 
+			{endif}
+
+			(L.L.door_0) (L.L.doorSpeed_0) (L.S.Timegap) * + (S.L.door_0)
+		{else}
+			0 (S.L.doorSpeed_0)
+		{endif}
+	{endif}
+
+	(L.L.door_0) 1 >
+	{if}
+		(T.L.ev_doorhitopen_0)
+		1 (S.L.door_0)
+		(L.L.doorSpeed_0) /-/ (L.L.doorRefl_0) * (S.L.doorSpeed_0)
+	{else}
+		(L.L.door_0) 0 <
+		{if}
+			(T.L.ev_doorhitclose_0)
+			0 (S.L.door_0)
+			(L.L.doorSpeed_0) /-/ (L.L.doorRefl_0) * (S.L.doorSpeed_0)
+		{endif}
+	{endif}
+{end}
+
+{macro:Door1_Calc}
+	(L.L.doorTarget_01)
+	{if}
+		(L.L.door_1) (F.L.door_1_opn_speed) (S.L.doorMaxSpeed_1)
+	{else}
+		(L.L.door_1) (F.L.door_1_cls_speed) (S.L.doorMaxSpeed_1)
+	{endif}
+
+	(L.L.doorTarget_01) ! (L.L.doorSpeed_1) s0 abs 0.05 > (L.L.door_1) 0 > || && 
+	{if}
+		l0 /-/ (L.L.doorMaxSpeed_1) <
+		{if}
+			(L.L.doorSpeed_1) (L.L.doorAcc_1) (L.S.Timegap) * - (S.L.doorSpeed_1)
+		{else}
+			(L.L.doorSpeed_1) (L.L.doorAcc_1) (L.S.Timegap) * + (S.L.doorSpeed_1)
+		{endif}
+		(L.L.door_1) (L.L.doorSpeed_1) (L.S.Timegap) * + (S.L.door_1)
+	{else}
+		(L.L.doorSpeed_1) abs 0.05 > (L.L.door_1) 1 < || (L.L.doorTarget_01) &&
+		{if}
+			l0 (L.L.doorMaxSpeed_1) <
+			{if}
+				(L.L.doorSpeed_1) (L.L.doorAcc_1) (L.S.Timegap) * + (S.L.doorSpeed_1) 
+			{else}
+				(L.L.doorSpeed_1) (L.L.doorAcc_1) (L.S.Timegap) * - (S.L.doorSpeed_1) 
+			{endif}
+
+			(L.L.door_1) (L.L.doorSpeed_1) (L.S.Timegap) * + (S.L.door_1)
+		{else}
+			0 (S.L.doorSpeed_1)
+		{endif}
+	{endif}
+
+	(L.L.door_1) 1 >
+	{if}
+		(T.L.ev_doorhitopen_1)
+		1 (S.L.door_1)
+		(L.L.doorSpeed_1) /-/ (L.L.doorRefl_1) * (S.L.doorSpeed_1)
+	{else}
+		(L.L.door_1) 0 <
+		{if}
+			(T.L.ev_doorhitclose_1)
+			0 (S.L.door_1)
+			(L.L.doorSpeed_1) /-/ (L.L.doorRefl_1) * (S.L.doorSpeed_1)
+		{endif}
+	{endif}
+{end}
+
+{macro:Door2_Calc}
+	(L.L.doorTarget_23)
+	{if}
+		(L.L.door_2) (F.L.door_2_opn_speed) (S.L.doorMaxSpeed_2)
+	{else}
+		(L.L.door_2) (F.L.door_2_cls_speed) (S.L.doorMaxSpeed_2)
+	{endif}
+
+	(L.L.doorTarget_23) ! (L.L.doorSpeed_2) s0 abs 0.05 > (L.L.door_2) 0 > || && 
+	{if}
+		l0 /-/ (L.L.doorMaxSpeed_2) <
+		{if}
+			(L.L.doorSpeed_2) (L.L.doorAcc_2) (L.S.Timegap) * - (S.L.doorSpeed_2)
+		{else}
+			(L.L.doorSpeed_2) (L.L.doorAcc_2) (L.S.Timegap) * + (S.L.doorSpeed_2)
+		{endif}
+		(L.L.door_2) (L.L.doorSpeed_2) (L.S.Timegap) * + (S.L.door_2)
+	{else}
+		(L.L.doorSpeed_2) abs 0.05 > (L.L.door_2) 1 < || (L.L.doorTarget_23) &&
+		{if}
+			l0 (L.L.doorMaxSpeed_2) <
+			{if}
+				(L.L.doorSpeed_2) (L.L.doorAcc_2) (L.S.Timegap) * + (S.L.doorSpeed_2) 
+			{else}
+				(L.L.doorSpeed_2) (L.L.doorAcc_2) (L.S.Timegap) * - (S.L.doorSpeed_2) 
+			{endif}
+			(L.L.door_2) (L.L.doorSpeed_2) (L.S.Timegap) * + (S.L.door_2)
+		{else}
+			0 (S.L.doorSpeed_2)
+		{endif}
+	{endif}
+
+	(L.L.door_2) 1 >
+	{if}
+		(T.L.ev_doorhitopen_2)
+		1 (S.L.door_2)
+		(L.L.doorSpeed_2) /-/ (L.L.doorRefl_2) * (S.L.doorSpeed_2)
+	{else}
+		(L.L.door_2) 0 <
+		{if}
+			(T.L.ev_doorhitclose_2)
+			0 (S.L.door_2)
+			(L.L.doorSpeed_2) /-/ (L.L.doorRefl_2) * (S.L.doorSpeed_2)
+		{endif}
+	{endif}
+{end}
+
+{macro:Door3_Calc}
+	(L.L.doorTarget_23)
+	{if}
+		(L.L.door_3) (F.L.door_3_opn_speed) (S.L.doorMaxSpeed_3)
+	{else}
+		(L.L.door_3) (F.L.door_3_cls_speed) (S.L.doorMaxSpeed_3)
+	{endif}
+
+	(L.L.doorTarget_23) ! (L.L.doorSpeed_3) s0 abs 0.05 > (L.L.door_3) 0 > || && 
+	{if}
+		l0 /-/ (L.L.doorMaxSpeed_3) <
+		{if}
+			(L.L.doorSpeed_3) (L.L.doorAcc_3) (L.S.Timegap) * - (S.L.doorSpeed_3)
+		{else}
+			(L.L.doorSpeed_3) (L.L.doorAcc_3) (L.S.Timegap) * + (S.L.doorSpeed_3)
+		{endif}
+		(L.L.door_3) (L.L.doorSpeed_3) (L.S.Timegap) * + (S.L.door_3)
+	{else}
+		(L.L.doorSpeed_3) abs 0.05 > (L.L.door_3) 1 < || (L.L.doorTarget_23) &&
+		{if}
+			l0 (L.L.doorMaxSpeed_3) <
+			{if}
+				(L.L.doorSpeed_3) (L.L.doorAcc_3) (L.S.Timegap) * + (S.L.doorSpeed_3) 
+			{else}
+				(L.L.doorSpeed_3) (L.L.doorAcc_3) (L.S.Timegap) * - (S.L.doorSpeed_3) 
+			{endif}
+			(L.L.door_3) (L.L.doorSpeed_3) (L.S.Timegap) * + (S.L.door_3)
+		{else}
+			0 (S.L.doorSpeed_3)
+		{endif}
+	{endif}
+
+	(L.L.door_3) 1 >
+	{if}
+		(T.L.ev_doorhitopen_3)
+		1 (S.L.door_3)
+		(L.L.doorSpeed_3) /-/ (L.L.doorRefl_3) * (S.L.doorSpeed_3)
+	{else}
+		(L.L.door_3) 0 <
+		{if}
+			(T.L.ev_doorhitclose_3)
+			0 (S.L.door_3)
+			(L.L.doorSpeed_3) /-/ (L.L.doorRefl_3) * (S.L.doorSpeed_3)
+		{endif}
+	{endif}
+{end}
+
+{macro:Door2_framex}
+	(L.L.door_2) (F.L.door2_xposition) (S.L.door2_positionx)
+{end}
+
+{macro:Door2_framey}
+	(L.L.door_2) (F.L.door2_yposition) (S.L.door2_positiony)
+{end}
+
+{macro:Door3_framex}
+	(L.L.door_3) (F.L.door3_xposition) (S.L.door3_positionx)
+{end}
+
+{macro:Door3_framey}
+	(L.L.door_3) (F.L.door3_yposition) (S.L.door3_positiony)
+{end}
+
+'###############################################################################################
+
+{macro:trg_bus_door01_open}
+	(L.L.doorTarget_01) ! (L.L.doorLock_01) ! &&
+	{if}
+		1 (S.L.doorTarget_01)
+		(T.L.ev_doortriggeropen_0)
+		(L.L.bremse_p_Tank04) 100000 - 0.96 * 100000 + (S.L.bremse_p_Tank04)
+	{endif}
+{end}
+
+{macro:trg_bus_door01_close}
+	(L.L.doorTarget_01)
+	{if}
+		0 (S.L.doorTarget_01)
+		(T.L.ev_doortriggerclose_0)
+		(L.L.bremse_p_Tank04) 100000 - 0.96 * 100000 + (S.L.bremse_p_Tank04)
+	{endif}
+{end}
+
+{macro:traegheit}
+
+'Simuliert trges Verhalten (exponentiell)
+
+'Ladekonventionen:
+'	Sollwert		l0
+'	Istwert			l1
+'	Konstante Anlauf	l2 (Einheiten/s)
+'	Konstante Ablauf	l3 (Einheiten/s)
+
+'Anlauf oder Auslauf?
+	l0 l1 > 
+	{if}
+		l2 (L.S.Timegap) * 1 min -1 max s4
+	{else}
+		l3 (L.S.Timegap) * 1 min -1 max s4
+	{endif}
+
+
+'Sollwert:
+	l0
+'Istwert:
+	l1
+'Beschleunigung:
+	- l4 *
+'Addition zum Istwert:
+	l1 + s1
+{end}

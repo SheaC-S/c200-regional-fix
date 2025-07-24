@@ -76,19 +76,19 @@ Regs_C200.org
 
 
 [sound]
-sound\sound_Voith.cfg
+Sound\[SCS] sound_Voith.cfg
 
 [sound_ai]
-sound\sound_Voith.cfg
+Sound\[SCS] sound_Voith.cfg
 
 [model]
-model\model_C200 10.8_MSDisplays.cfg
+model\[SCS]\model_C200 10.8_MSDisplays.cfg
 
 [paths]
-model\paths regional.cfg
+model\[SCS]\paths.cfg
 
 [passengercabin]
-model\passengercabin regional.cfg
+model\[SCS]\passengercabin.cfg
 
 
 
@@ -97,7 +97,7 @@ model\passengercabin regional.cfg
 	////////////////////////////////////////////////////////
 [script]
 32
-script\C200_main_MSDisplays.osc
+script\[SCS]\C200_main_MSDisplays.osc
 script\C200_main_AI_MSDisplays.osc
 ..\MAN_SD202\script\auspuff.osc
 ..\MAN_SD202\script\wiper.osc
@@ -106,12 +106,12 @@ script\C200_main_AI_MSDisplays.osc
 ..\MAN_SD202\script\rain.osc
 ..\MAN_SD202\script\dirt.osc
 script\collision.osc
-script\cockpit.osc
+script\[SCS]\cockpit.osc
 script\Gearbox\DIWA.osc
 script\engine_E40D.osc
-script\elec.osc
+script\[SCS]\elec.osc
 script\bremse.osc
-script\door_8.9m.osc
+script\[SCS]\door_8.9m.osc
 script\C200_Sound_Volumes_Script.osc
 script\ticketprinter_l.osc
 script\lights.osc
@@ -123,6 +123,7 @@ script\Road-hog123\Powerblind\powerblind_script.osc
 script\iBus\IBIS-2.osc
 script\Road-hog123\RIBAS\RIBAS_script.osc
 script\CCTV\CCTVBoard_Script.osc
+script\[SCS]\cashtray_script.osc
 ..\MS_Veiling\script\ExtDisplays\ExtDisplays.osc
 ..\MS_Veiling\script\ExtDisplays\Hanover\Controllers\deric.osc
 ..\MS_Veiling\script\ExtDisplays\Mobitec\Controllers\602.osc
@@ -490,6 +491,16 @@ Passagiersichten
 45
 135
 0
+
+	18: Custom SCS
+[add_camera_pax]
+-10
+10
+1.5
+0
+32.5
+130
+2.5
 
 
 	Folgender Befehl setzt die Standardfahrerkamera:
