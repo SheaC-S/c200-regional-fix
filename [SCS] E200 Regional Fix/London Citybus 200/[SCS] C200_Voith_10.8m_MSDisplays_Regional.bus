@@ -96,7 +96,7 @@ model\[SCS]\passengercabin.cfg
 		Scripts
 	////////////////////////////////////////////////////////
 [script]
-32
+33
 script\[SCS]\C200_main_MSDisplays.osc
 script\C200_main_AI_MSDisplays.osc
 ..\MAN_SD202\script\auspuff.osc
